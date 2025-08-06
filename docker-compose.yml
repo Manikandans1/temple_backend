@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # This is your FastAPI application service
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db # This tells the API to wait until the database is ready
+
+  # This is your PostgreSQL database service
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=temple_admin
+      - POSTGRES_PASSWORD=NextSteps2025
+      - POSTGRES_DB=temple_db
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
