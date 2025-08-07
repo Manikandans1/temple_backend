@@ -10,6 +10,7 @@ from app.schemas import all_schemas as schemas
 router = APIRouter()
 
 
+
 @router.get("/bookings/temple/{temple_id}", response_model=List[schemas.Booking])
 def get_temple_bookings(
     temple_id: int,
@@ -92,3 +93,16 @@ def update_booking_stage(
         raise HTTPException(status_code=404, detail="Stage or Booking not found")
     return updated_stage
 
+# --- NEW ENDPOINT TO ADD A SERVICE ---
+@router.post("/temples/{temple_id}/services", response_model=schemas.PoojaService)
+def create_pooja_service_for_temple(
+    temple_id: int,
+    service_in: schemas.PoojaServiceCreate,
+    db: Session = Depends(deps.get_db),
+    admin_user: models.User = Depends(deps.get_current_admin_user)
+):
+    """
+    Create a new pooja service for a specific temple.
+    """
+    return crud.pooja_service.create_for_temple(db, obj_in=service_in, temple_id=temple_id)
+# --- END OF NEW ENDPOINT ---
