@@ -1,6 +1,6 @@
 # NEW FILE: app/api/v1/endpoints/admin.py
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 from app.api import deps
 from app.crud import crud_main as crud
@@ -9,19 +9,19 @@ from app.schemas import all_schemas as schemas
 
 router = APIRouter()
 
-@router.get("/bookings/temple/{temple_id}", response_model=List[schemas.Booking])
-def get_temple_bookings(
-    temple_id: int,
-    db: Session = Depends(deps.get_db),
-    admin_user: models.User = Depends(deps.get_current_admin_user)
-):
-    bookings = crud.booking.get_multi_by_temple(db, temple_id=temple_id)
-    return [
-        { "id": b.id, "temple_name": b.temple.name, "temple_image_url": b.temple.image_url,
-          "pooja_name": b.pooja_service.name, "booking_date": b.booking_date,
-          "price": b.pooja_service.price, "status": b.status, "stages": b.stages, }
-        for b in bookings
-    ]
+# @router.get("/bookings/temple/{temple_id}", response_model=List[schemas.Booking])
+# def get_temple_bookings(
+#     temple_id: int,
+#     db: Session = Depends(deps.get_db),
+#     admin_user: models.User = Depends(deps.get_current_admin_user)
+# ):
+#     bookings = crud.booking.get_multi_by_temple(db, temple_id=temple_id)
+#     return [
+#         { "id": b.id, "temple_name": b.temple.name, "temple_image_url": b.temple.image_url,
+#           "pooja_name": b.pooja_service.name, "booking_date": b.booking_date,
+#           "price": b.pooja_service.price, "status": b.status, "stages": b.stages, }
+#         for b in bookings
+#     ]
 
 @router.put("/bookings/stage", response_model=schemas.PoojaStage)
 def update_booking_stage(
