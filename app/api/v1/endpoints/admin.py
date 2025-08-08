@@ -9,8 +9,6 @@ from app.schemas import all_schemas as schemas
 
 router = APIRouter()
 
-
-
 @router.get("/bookings/temple/{temple_id}", response_model=List[schemas.Booking])
 def get_temple_bookings(
     temple_id: int,
@@ -55,6 +53,18 @@ def delete_temple(temple_id: int, db: Session = Depends(deps.get_db), admin_user
     if not deleted_temple:
         raise HTTPException(status_code=404, detail="Temple not found")
     return deleted_temple
+
+@router.put("/temples/{temple_id}", response_model=schemas.Temple)
+def update_temple(
+    temple_id: int,
+    temple_in: schemas.TempleUpdate,
+    db: Session = Depends(deps.get_db),
+    admin_user: models.User = Depends(deps.get_current_admin_user)
+):
+    db_temple = crud.temple.get(db, id=temple_id)
+    if not db_temple:
+        raise HTTPException(status_code=404, detail="Temple not found")
+    return crud.temple.update(db, db_obj=db_temple, obj_in=temple_in)
 
 
 # --- Promo Code Management ---

@@ -23,7 +23,16 @@ class CRUDUser(CRUDBase[models.User, schemas.UserCreate]):
 class CRUDTemple(CRUDBase[models.Temple, schemas.TempleCreate]):
     def get_with_services(self, db: Session, *, id: int):
         return db.query(self.model).options(joinedload(self.model.services)).filter(self.model.id == id).first()
-
+    
+    def update(self, db: Session, *, db_obj: models.Temple, obj_in: schemas.TempleUpdate) -> models.Temple:
+        update_data = obj_in.model_dump(exclude_unset=True)
+        for field in update_data:
+            setattr(db_obj, field, update_data[field])
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+    
 class CRUDPoojaService(CRUDBase[models.PoojaService, schemas.PoojaServiceCreate]):
     def create_for_temple(self, db: Session, *, obj_in: schemas.PoojaServiceCreate, temple_id: int):
         db_obj = models.PoojaService(**obj_in.model_dump(), temple_id=temple_id)

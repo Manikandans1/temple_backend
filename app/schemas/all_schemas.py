@@ -26,15 +26,6 @@ class Token(BaseModel): # <-- UPDATED to include user info on login
 class UserCreate(UserBase):
     name: str
     email: EmailStr
-# class User(UserBase):
-#     id: int
-#     name: Optional[str] = None
-#     email: Optional[EmailStr] = None
-#     class Config: from_attributes = True
-
-# class Token(BaseModel):
-#     access_token: str
-#     token_type: str
 
 class TokenPayload(BaseModel):
     sub: Optional[int] = None
@@ -69,6 +60,13 @@ class TempleBase(BaseModel):
     description: str
 class TempleCreate(TempleBase):
     pass
+
+class TempleUpdate(BaseModel):
+    name: Optional[str] = None
+    location: Optional[str] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+
 class Temple(TempleBase):
     id: int
     class Config: from_attributes = True
