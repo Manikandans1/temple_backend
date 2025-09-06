@@ -46,6 +46,78 @@ class CRUDPromoCode(CRUDBase[models.PromoCode, schemas.PromoCodeCreate]):
         return db.query(self.model).filter(models.PromoCode.code == code, models.PromoCode.is_active == True).first()
 
 
+# class CRUDBooking(CRUDBase[models.Booking, schemas.BookingCreate]):
+#     # THIS FUNCTION IS CORRECTED to be a single, reliable transaction
+#     def create_with_owner(self, db: Session, *, obj_in: schemas.BookingCreate, user_id: int):
+#         # 1. Create the main Booking object in memory
+#         db_booking = models.Booking(
+#             booking_date=obj_in.booking_date, total_amount=obj_in.total_amount,
+#             video_option=obj_in.video_option, devotee_name=obj_in.devotee_name,
+#             devotee_nakshatra=obj_in.devotee_nakshatra, user_id=user_id,
+#             temple_id=obj_in.temple_id, pooja_service_id=obj_in.pooja_id,
+
+#             shipping_address_line1=obj_in.shipping_address_line1,
+#             shipping_address_line2=obj_in.shipping_address_line2,
+#             shipping_city=obj_in.shipping_city,
+#             shipping_pincode=obj_in.shipping_pincode,
+#             shipping_country=obj_in.shipping_country
+#         )
+#         db.add(db_booking)
+        
+#         # 2. Flush the session to get the ID for the new booking without committing the transaction yet
+#         db.flush()
+
+#         # 3. Create the dependent FamilyMember and PoojaStage objects
+#         for member in obj_in.family_members:
+#             db.add(models.FamilyMember(name=member.name, nakshatra=member.nakshatra, booking_id=db_booking.id))
+        
+#         initial_stages = [
+#             models.PoojaStage(title="Booking Confirmed", description="We have received your booking details.", status=models.StageStatus.completed, timestamp=datetime.now(timezone.utc), booking_id=db_booking.id),
+#             models.PoojaStage(title="Sankalpam Preparation", description="Your details are being prepared for the sankalpam.", status=models.StageStatus.pending, booking_id=db_booking.id),
+#             models.PoojaStage(title="Pooja in Progress", description="The priest is currently performing the pooja on your behalf.", status=models.StageStatus.pending, booking_id=db_booking.id),
+#             models.PoojaStage(title="Pooja Completed", description="Your pooja has been successfully completed by the priest.", status=models.StageStatus.pending, booking_id=db_booking.id),
+#         ]
+#         db.add_all(initial_stages)
+
+#         # 4. Commit the entire transaction at once
+#         db.commit()
+#         db.refresh(db_booking)
+#         return db_booking
+
+#     def get_multi_by_owner(self, db: Session, *, user_id: int):
+#         return db.query(self.model).filter(models.Booking.user_id == user_id).order_by(models.Booking.booking_date.desc()).all()
+#     def get_multi_by_temple(self, db: Session, *, temple_id: int):
+#         return db.query(self.model).filter(models.Booking.temple_id == temple_id).order_by(models.Booking.booking_date.desc()).all()
+#     def update_stage(self, db: Session, *, booking_id: int, stage_id: int, status: models.StageStatus):
+#         stage = db.query(models.PoojaStage).filter(models.PoojaStage.booking_id == booking_id, models.PoojaStage.id == stage_id).first()
+#         if stage:
+#             stage.status = status
+#             if status == models.StageStatus.completed or status == models.StageStatus.inProgress:
+#                 stage.timestamp = datetime.now(timezone.utc)
+#             db.commit()
+#             db.refresh(stage)
+#             return stage
+#         return None
+
+# # --- NEW CLASS TO HANDLE POOJA SERVICES ---
+# class CRUDPoojaService(CRUDBase[models.PoojaService, schemas.PoojaServiceCreate]):
+#     def create_for_temple(self, db: Session, *, obj_in: schemas.PoojaServiceCreate, temple_id: int):
+#         # Creates a new service and links it to the correct temple
+#         db_obj = models.PoojaService(**obj_in.model_dump(), temple_id=temple_id)
+#         db.add(db_obj)
+#         db.commit()
+#         db.refresh(db_obj)
+#         return db_obj
+
+# user = CRUDUser(models.User)
+# temple = CRUDTemple(models.Temple)
+# pooja_service = CRUDPoojaService(models.PoojaService)
+# promo_code = CRUDPromoCode(models.PromoCode)
+# booking = CRUDBooking(models.Booking)
+
+
+
+
 class CRUDBooking(CRUDBase[models.Booking, schemas.BookingCreate]):
     # THIS FUNCTION IS CORRECTED to be a single, reliable transaction
     def create_with_owner(self, db: Session, *, obj_in: schemas.BookingCreate, user_id: int):
@@ -55,7 +127,6 @@ class CRUDBooking(CRUDBase[models.Booking, schemas.BookingCreate]):
             video_option=obj_in.video_option, devotee_name=obj_in.devotee_name,
             devotee_nakshatra=obj_in.devotee_nakshatra, user_id=user_id,
             temple_id=obj_in.temple_id, pooja_service_id=obj_in.pooja_id,
-
             shipping_address_line1=obj_in.shipping_address_line1,
             shipping_address_line2=obj_in.shipping_address_line2,
             shipping_city=obj_in.shipping_city,
@@ -86,8 +157,10 @@ class CRUDBooking(CRUDBase[models.Booking, schemas.BookingCreate]):
 
     def get_multi_by_owner(self, db: Session, *, user_id: int):
         return db.query(self.model).filter(models.Booking.user_id == user_id).order_by(models.Booking.booking_date.desc()).all()
+
     def get_multi_by_temple(self, db: Session, *, temple_id: int):
         return db.query(self.model).filter(models.Booking.temple_id == temple_id).order_by(models.Booking.booking_date.desc()).all()
+
     def update_stage(self, db: Session, *, booking_id: int, stage_id: int, status: models.StageStatus):
         stage = db.query(models.PoojaStage).filter(models.PoojaStage.booking_id == booking_id, models.PoojaStage.id == stage_id).first()
         if stage:
@@ -98,17 +171,20 @@ class CRUDBooking(CRUDBase[models.Booking, schemas.BookingCreate]):
             db.refresh(stage)
             return stage
         return None
+        
+    def remove(self, db: Session, *, id: int):
+        # First, delete all dependent children
+        db.query(models.FamilyMember).filter(models.FamilyMember.booking_id == id).delete(synchronize_session=False)
+        db.query(models.PoojaStage).filter(models.PoojaStage.booking_id == id).delete(synchronize_session=False)
+        
+        # Now delete the parent booking
+        obj = db.query(self.model).get(id)
+        if obj:
+            db.delete(obj)
+            db.commit()
+        return obj
 
-# --- NEW CLASS TO HANDLE POOJA SERVICES ---
-class CRUDPoojaService(CRUDBase[models.PoojaService, schemas.PoojaServiceCreate]):
-    def create_for_temple(self, db: Session, *, obj_in: schemas.PoojaServiceCreate, temple_id: int):
-        # Creates a new service and links it to the correct temple
-        db_obj = models.PoojaService(**obj_in.model_dump(), temple_id=temple_id)
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
-
+# Create instances of the CRUD classes (unchanged)
 user = CRUDUser(models.User)
 temple = CRUDTemple(models.Temple)
 pooja_service = CRUDPoojaService(models.PoojaService)
