@@ -73,9 +73,23 @@ class Temple(TempleBase):
 class TempleWithServices(Temple):
     services: List[PoojaService] = []
 
+# class FamilyMemberCreate(BaseModel):
+#     name: str
+#     nakshatra: Optional[str] = None
+# class BookingCreate(BaseModel):
+#     pooja_id: int
+#     temple_id: int
+#     booking_date: datetime
+#     devotee_name: str
+#     devotee_nakshatra: str
+#     family_members: List[FamilyMemberCreate]
+#     video_option: Optional[str] = None
+#     total_amount: float
+
 class FamilyMemberCreate(BaseModel):
     name: str
     nakshatra: Optional[str] = None
+
 class BookingCreate(BaseModel):
     pooja_id: int
     temple_id: int
@@ -85,6 +99,16 @@ class BookingCreate(BaseModel):
     family_members: List[FamilyMemberCreate]
     video_option: Optional[str] = None
     total_amount: float
+    
+    # --- NEW FIELDS FOR SHIPPING ADDRESS ---
+    shipping_address_line1: Optional[str] = None
+    shipping_address_line2: Optional[str] = None
+    shipping_city: Optional[str] = None
+    shipping_pincode: Optional[str] = None
+    shipping_country: Optional[str] = None
+    # --- END OF NEW FIELDS ---
+
+
 class PoojaStage(BaseModel):
     title: str
     description: str

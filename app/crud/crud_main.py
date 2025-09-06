@@ -54,7 +54,13 @@ class CRUDBooking(CRUDBase[models.Booking, schemas.BookingCreate]):
             booking_date=obj_in.booking_date, total_amount=obj_in.total_amount,
             video_option=obj_in.video_option, devotee_name=obj_in.devotee_name,
             devotee_nakshatra=obj_in.devotee_nakshatra, user_id=user_id,
-            temple_id=obj_in.temple_id, pooja_service_id=obj_in.pooja_id
+            temple_id=obj_in.temple_id, pooja_service_id=obj_in.pooja_id,
+
+            shipping_address_line1=obj_in.shipping_address_line1,
+            shipping_address_line2=obj_in.shipping_address_line2,
+            shipping_city=obj_in.shipping_city,
+            shipping_pincode=obj_in.shipping_pincode,
+            shipping_country=obj_in.shipping_country
         )
         db.add(db_booking)
         

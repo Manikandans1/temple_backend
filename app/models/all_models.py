@@ -44,6 +44,25 @@ class BookingStatus(str, enum.Enum):
     upcoming = "upcoming"
     completed = "completed"
     cancelled = "cancelled"
+
+# class Booking(Base):
+#     __tablename__ = "bookings"
+#     id = Column(Integer, primary_key=True, index=True)
+#     booking_date = Column(DateTime, nullable=False)
+#     status = Column(SQLAlchemyEnum(BookingStatus), nullable=False, default=BookingStatus.upcoming)
+#     total_amount = Column(Float, nullable=False)
+#     video_option = Column(String, nullable=True)
+#     devotee_name = Column(String)
+#     devotee_nakshatra = Column(String)
+#     user_id = Column(Integer, ForeignKey("users.id"))
+#     temple_id = Column(Integer, ForeignKey("temples.id"))
+#     pooja_service_id = Column(Integer, ForeignKey("pooja_services.id"))
+#     user = relationship("User")
+#     temple = relationship("Temple")
+#     pooja_service = relationship("PoojaService")
+#     family_members = relationship("FamilyMember", back_populates="booking")
+#     stages = relationship("PoojaStage", back_populates="booking")
+
 class Booking(Base):
     __tablename__ = "bookings"
     id = Column(Integer, primary_key=True, index=True)
@@ -53,14 +72,29 @@ class Booking(Base):
     video_option = Column(String, nullable=True)
     devotee_name = Column(String)
     devotee_nakshatra = Column(String)
+    
+    # --- NEW FIELDS FOR SHIPPING ADDRESS ---
+    shipping_address_line1 = Column(String, nullable=True)
+    shipping_address_line2 = Column(String, nullable=True)
+    shipping_city = Column(String, nullable=True)
+    shipping_pincode = Column(String, nullable=True)
+    shipping_country = Column(String, nullable=True)
+    # --- END OF NEW FIELDS ---
+    
     user_id = Column(Integer, ForeignKey("users.id"))
     temple_id = Column(Integer, ForeignKey("temples.id"))
     pooja_service_id = Column(Integer, ForeignKey("pooja_services.id"))
+    
     user = relationship("User")
     temple = relationship("Temple")
     pooja_service = relationship("PoojaService")
-    family_members = relationship("FamilyMember", back_populates="booking")
-    stages = relationship("PoojaStage", back_populates="booking")
+    family_members = relationship("FamilyMember", back_populates="booking", cascade="all, delete-orphan")
+    stages = relationship("PoojaStage", back_populates="booking", cascade="all, delete-orphan")
+
+
+
+
+
 class FamilyMember(Base):
     __tablename__ = "family_members"
     id = Column(Integer, primary_key=True, index=True)
